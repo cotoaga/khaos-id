@@ -4,6 +4,8 @@ Federated identity for the KHAOS ecosystem. Email + password auth on top of a lo
 
 This repo is the proof-of-shape for **Architecture B** — see `docs/architecture.md` and `docs/adr/0001-federated-jwt-supabase.md`.
 
+Production: <https://khaos-id.vercel.app> (eventually `https://id.cotoaga.ai`). Hosted on Vercel with a Supabase Cloud substrate — see `docs/deployment.md` and `docs/adr/0003-hosted-supabase-substrate.md`.
+
 ## Local development
 
 ### Prerequisites
@@ -79,10 +81,12 @@ supabase/
   config.toml           local config (asymmetric signing enabled)
 docs/
   architecture.md
+  deployment.md
   sibling-integration.md
   adr/0001-federated-jwt-supabase.md
+  adr/0003-hosted-supabase-substrate.md
 ```
 
 ## What's deliberately out of scope
 
-Password reset, email verification, MFA, passkeys, OAuth, admin views, production deployment, custom-domain cookie scope. Each gets its own issue.
+Password reset, email verification, MFA, passkeys, OAuth, admin views, custom-domain cookie scope. Each gets its own issue.
