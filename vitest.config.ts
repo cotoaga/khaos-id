@@ -5,9 +5,12 @@ export default defineConfig({
   css: {
     postcss: { plugins: [] },
   },
+  esbuild: {
+    jsx: "automatic",
+  },
   test: {
     environment: "node",
-    include: ["**/*.test.ts"],
+    include: ["**/*.test.ts", "**/*.test.tsx"],
     exclude: ["node_modules/**", ".next/**", "out/**"],
   },
   resolve: {
