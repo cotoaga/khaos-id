@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { signupAction } from "@/app/(auth)/actions";
 
+const fieldInput =
+  "border border-[var(--brand-border)] bg-[var(--brand-page-bg)] px-3 py-2 text-[var(--brand-text-body)] font-mono text-sm focus:border-[var(--brand-primary)] focus:outline-none";
+
 export default async function SignupPage({
   searchParams,
 }: {
@@ -10,26 +13,28 @@ export default async function SignupPage({
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 px-6 py-16">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold">Create account</h1>
-        <p className="text-sm text-neutral-500">
-          Email + password. Identity is stored in Supabase Auth — no local users
-          table.
+      <header className="space-y-2">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--brand-hero-color)]">
+          Create account
+        </h1>
+        <p className="text-sm text-[var(--brand-text-secondary)]">
+          Email + password. Identity is stored in Supabase Auth — no local
+          users table.
         </p>
       </header>
 
-      <form action={signupAction} className="flex flex-col gap-3">
-        <label className="flex flex-col gap-1 text-sm">
+      <form action={signupAction} className="flex flex-col gap-4">
+        <label className="flex flex-col gap-1 text-xs uppercase tracking-[0.15em] text-[var(--brand-text-secondary)]">
           Email
           <input
             type="email"
             name="email"
             required
             autoComplete="email"
-            className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+            className={fieldInput}
           />
         </label>
-        <label className="flex flex-col gap-1 text-sm">
+        <label className="flex flex-col gap-1 text-xs uppercase tracking-[0.15em] text-[var(--brand-text-secondary)]">
           Password
           <input
             type="password"
@@ -37,28 +42,31 @@ export default async function SignupPage({
             required
             minLength={6}
             autoComplete="new-password"
-            className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
+            className={fieldInput}
           />
         </label>
         {error ? (
           <p
             role="alert"
-            className="rounded border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-800 dark:border-red-800 dark:bg-red-950 dark:text-red-200"
+            className="border border-red-500/40 bg-red-500/10 px-3 py-2 font-mono text-sm text-red-300"
           >
             {error}
           </p>
         ) : null}
         <button
           type="submit"
-          className="rounded bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-700 dark:bg-white dark:text-neutral-900"
+          className="mt-2 w-full bg-[var(--brand-primary)] px-7 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--brand-button-text)] transition hover:bg-[var(--brand-accent)] hover:text-[var(--cotoaga-ai-deep-sky)] hover:shadow-[var(--brand-hover-shadow)]"
         >
           Sign up
         </button>
       </form>
 
-      <p className="text-sm text-neutral-500">
+      <p className="text-sm text-[var(--brand-text-secondary)]">
         Already have an account?{" "}
-        <Link className="underline" href="/login">
+        <Link
+          className="text-[var(--brand-primary)] underline decoration-[var(--brand-primary)]/40 underline-offset-4 transition hover:text-[var(--brand-accent)]"
+          href="/login"
+        >
           Sign in
         </Link>
       </p>

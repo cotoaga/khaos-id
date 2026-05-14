@@ -18,6 +18,11 @@ function formatClaim(key: string, value: unknown): string {
   return String(value);
 }
 
+const surfaceCard =
+  "border border-[var(--brand-border)] bg-[var(--brand-surface)] p-6 shadow-[0_2px_8px_rgba(0,0,0,0.2)]";
+const sectionLabel =
+  "font-mono text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-text-secondary)]";
+
 export default async function AccountPage() {
   const supabase = await createClient();
   const {
@@ -53,70 +58,83 @@ export default async function AccountPage() {
     .map((key) => ({ label: key, value: formatClaim(key, claims[key]) }));
 
   return (
-    <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-12">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold">Account</h1>
-        <p className="text-sm text-neutral-500">
+    <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-8 px-6 py-16">
+      <header className="space-y-2">
+        <h1 className="font-display text-3xl font-semibold tracking-tight text-[var(--brand-hero-color)]">
+          Account
+        </h1>
+        <p className="text-sm text-[var(--brand-text-secondary)]">
           Identity surface for federated JWT (Architecture B). Everything below
           comes from the access token the browser holds via httpOnly cookie.
         </p>
       </header>
 
-      <section className="rounded border border-neutral-200 p-4 dark:border-neutral-800">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
-          JWKS verification
-        </h2>
+      <section className={surfaceCard}>
+        <h2 className={sectionLabel}>JWKS verification</h2>
         {verificationStatus === "verified" ? (
-          <p className="mt-2 text-sm">
-            <span className="font-medium text-green-700 dark:text-green-400">
+          <p className="mt-3 text-sm">
+            <span className="font-semibold text-[var(--cotoaga-green)]">
               Signature verified
             </span>{" "}
-            against <code>{process.env.SUPABASE_JWKS_URL}</code>
+            against{" "}
+            <code className="font-mono text-[var(--brand-code-text)]">
+              {process.env.SUPABASE_JWKS_URL}
+            </code>
             {alg ? (
               <>
                 {" "}
-                · alg <code>{alg}</code>
+                · alg{" "}
+                <code className="font-mono text-[var(--brand-code-text)]">
+                  {alg}
+                </code>
               </>
             ) : null}
             {kid ? (
               <>
                 {" "}
-                · kid <code>{kid}</code>
+                · kid{" "}
+                <code className="font-mono text-[var(--brand-code-text)]">
+                  {kid}
+                </code>
               </>
             ) : null}
             .
           </p>
         ) : (
-          <p className="mt-2 text-sm text-red-700 dark:text-red-400">
+          <p className="mt-3 text-sm text-red-300">
             Signature verification failed: {verificationError}
           </p>
         )}
       </section>
 
-      <section className="rounded border border-neutral-200 p-4 dark:border-neutral-800">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
-          Core claims
-        </h2>
-        <dl className="mt-2 grid grid-cols-[8rem_1fr] gap-x-3 gap-y-1 text-sm">
+      <section className={surfaceCard}>
+        <h2 className={sectionLabel}>Core claims</h2>
+        <dl className="mt-3 grid grid-cols-[8rem_1fr] gap-x-4 gap-y-2 text-sm">
           {coreRows.map((row) => (
             <div key={row.label} className="contents">
-              <dt className="font-mono text-neutral-500">{row.label}</dt>
-              <dd className="break-all font-mono">{row.value}</dd>
+              <dt className="font-mono text-[var(--brand-text-secondary)]">
+                {row.label}
+              </dt>
+              <dd className="break-all font-mono text-[var(--brand-text-body)]">
+                {row.value}
+              </dd>
             </div>
           ))}
         </dl>
       </section>
 
       {extraRows.length > 0 ? (
-        <section className="rounded border border-neutral-200 p-4 dark:border-neutral-800">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
-            Other claims
-          </h2>
-          <dl className="mt-2 grid grid-cols-[8rem_1fr] gap-x-3 gap-y-1 text-sm">
+        <section className={surfaceCard}>
+          <h2 className={sectionLabel}>Other claims</h2>
+          <dl className="mt-3 grid grid-cols-[8rem_1fr] gap-x-4 gap-y-2 text-sm">
             {extraRows.map((row) => (
               <div key={row.label} className="contents">
-                <dt className="font-mono text-neutral-500">{row.label}</dt>
-                <dd className="break-all font-mono">{row.value}</dd>
+                <dt className="font-mono text-[var(--brand-text-secondary)]">
+                  {row.label}
+                </dt>
+                <dd className="break-all font-mono text-[var(--brand-text-body)]">
+                  {row.value}
+                </dd>
               </div>
             ))}
           </dl>
@@ -126,7 +144,7 @@ export default async function AccountPage() {
       <form action="/logout" method="post">
         <button
           type="submit"
-          className="rounded border border-neutral-300 px-3 py-2 text-sm hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+          className="border border-[var(--brand-border)] bg-transparent px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.18em] text-[var(--brand-text-body)] transition hover:border-[var(--brand-accent)] hover:text-[var(--brand-accent)]"
         >
           Sign out
         </button>
