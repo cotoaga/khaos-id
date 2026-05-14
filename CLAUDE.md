@@ -2,7 +2,7 @@
 
 **Mission.** Federated identity for the KHAOS ecosystem (Architecture B). One auth surface, many siblings; everyone trusts the same JWKS.
 
-**Aesthetic.** Tailwind defaults. Branding is out of scope until the seam works.
+**Style.** Style Seed: **v2.1**. Brand: **cotoaga.ai**, dark theme default (deep-sky `#191A2E` page bg, dark-marine `#16213E` surfaces, `--cotoaga-green` CTAs, `--cotoaga-ai-sand` accent, `--cotoaga-cyan` hero/code). Sharp edges (`border-radius: 0`). Tokens declared in `app/globals.css`; fonts (Space Grotesk / Inter / JetBrains Mono) loaded via `next/font/google` in `app/layout.tsx`. The `MonadField` hero on `/` keeps its scoped Pythagorean register (Cormorant Garamond + gold-on-near-black) as a sovereign visual exception — do not blend with cotoaga.ai tokens. Reference: `../khaos-seeds/seed-style.md` v2.1, cotoaga.ai chapter.
 
 **Linear.** Team `CotoagaDotNet`. Issues are source of truth. Pre-push summary as a Linear comment on the active issue before every push.
 
