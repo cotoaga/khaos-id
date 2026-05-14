@@ -1,26 +1,82 @@
 @import "tailwindcss";
 
+/* cotoaga.ai brand tokens — Style Seed v2.1, dark theme as default.
+   Source: ../khaos-seeds/seed-style.md, cotoaga.ai chapter. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --space-2xl: 48px;
+  --space-3xl: 64px;
+
+  --leading-tight: 1.2;
+  --leading-normal: 1.6;
+  --leading-relaxed: 1.8;
+
+  --cotoaga-green: #00a86b;
+  --cotoaga-blue: #0088ff;
+  --cotoaga-cyan: #00d4ff;
+
+  --cotoaga-ai-success: #098a5e;
+  --cotoaga-ai-info: #2f67b2;
+  --cotoaga-ai-gold: #e9b320;
+  --cotoaga-ai-sand: #eb9929;
+
+  --cotoaga-ai-white: #fafbfb;
+  --cotoaga-ai-smoke: #e0e0e0;
+  --cotoaga-ai-grey-light: #8a8a8a;
+  --cotoaga-ai-grey: #4a4a4a;
+  --cotoaga-ai-grey-dark: #2d2d2d;
+  --cotoaga-ai-dark-marine: #16213e;
+  --cotoaga-ai-deep-sky: #191a2e;
+  --cotoaga-ai-black: #0b0b0b;
+
+  --brand-radius: 0;
+
+  /* Dark-theme token map per cotoaga.ai chapter. */
+  --brand-primary: var(--cotoaga-green);
+  --brand-accent: var(--cotoaga-ai-sand);
+  --brand-hero-color: var(--cotoaga-cyan);
+  --brand-surface: var(--cotoaga-ai-dark-marine);
+  --brand-page-bg: var(--cotoaga-ai-deep-sky);
+  --brand-border: rgba(255, 255, 255, 0.1);
+  --brand-text-body: var(--cotoaga-ai-white);
+  --brand-text-secondary: var(--cotoaga-ai-grey-light);
+  --brand-tint-bg: rgba(235, 153, 41, 0.05);
+  --brand-hover-shadow: 0 4px 16px rgba(235, 153, 41, 0.15);
+  --brand-code-bg: var(--cotoaga-ai-deep-sky);
+  --brand-code-text: var(--cotoaga-cyan);
+  --brand-button-text: var(--cotoaga-ai-white);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-brand-primary: var(--brand-primary);
+  --color-brand-accent: var(--brand-accent);
+  --color-brand-hero: var(--brand-hero-color);
+  --color-brand-surface: var(--brand-surface);
+  --color-brand-page-bg: var(--brand-page-bg);
+  --color-brand-border: var(--brand-border);
+  --color-brand-text-body: var(--brand-text-body);
+  --color-brand-text-secondary: var(--brand-text-secondary);
+  --color-brand-tint-bg: var(--brand-tint-bg);
+  --color-brand-code-bg: var(--brand-code-bg);
+  --color-brand-code-text: var(--brand-code-text);
+  --color-cotoaga-green: var(--cotoaga-green);
+  --color-cotoaga-cyan: var(--cotoaga-cyan);
+  --color-cotoaga-ai-sand: var(--cotoaga-ai-sand);
+  --color-cotoaga-ai-success: var(--cotoaga-ai-success);
+  --color-cotoaga-ai-deep-sky: var(--cotoaga-ai-deep-sky);
+  --color-cotoaga-ai-dark-marine: var(--cotoaga-ai-dark-marine);
+  --font-display: var(--font-display), "Space Grotesk", sans-serif;
+  --font-primary: var(--font-primary), Inter, sans-serif;
+  --font-mono: var(--font-mono), "JetBrains Mono", monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--brand-page-bg);
+  color: var(--brand-text-body);
+  font-family: var(--font-primary), Inter, sans-serif;
+  line-height: var(--leading-normal);
 }
