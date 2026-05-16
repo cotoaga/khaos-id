@@ -38,6 +38,12 @@ export default async function LoginPage({
             className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
           />
         </label>
+        <Link
+          className="-mt-1 self-end text-xs text-neutral-500 underline"
+          href="/forgot"
+        >
+          Forgot password?
+        </Link>
         {error ? (
           <p
             role="alert"
