@@ -1,49 +1,45 @@
-import Link from "next/link";
-import { loginAction } from "@/app/(auth)/actions";
+import { redirect } from "next/navigation";
+import { updatePasswordAction } from "@/app/(auth)/actions";
+import { createClient } from "@/lib/supabase/server";
 
-export default async function LoginPage({
+export default async function ResetConfirmPage({
   searchParams,
 }: {
   searchParams: Promise<{ error?: string }>;
 }) {
   const { error } = await searchParams;
 
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    redirect(
+      `/login?error=${encodeURIComponent("Recovery link expired. Request a new one.")}`,
+    );
+  }
+
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 px-6 py-16">
       <header className="space-y-1">
-        <h1 className="text-2xl font-semibold">Sign in</h1>
+        <h1 className="text-2xl font-semibold">Choose a new password</h1>
         <p className="text-sm text-neutral-500">
-          Existing identity from khaos-id Supabase Auth.
+          Signed in via recovery link. Set a new password to finish.
         </p>
       </header>
 
-      <form action={loginAction} className="flex flex-col gap-3">
+      <form action={updatePasswordAction} className="flex flex-col gap-3">
         <label className="flex flex-col gap-1 text-sm">
-          Email
-          <input
-            type="email"
-            name="email"
-            required
-            autoComplete="email"
-            className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-sm">
-          Password
+          New password
           <input
             type="password"
             name="password"
             required
-            autoComplete="current-password"
+            minLength={6}
+            autoComplete="new-password"
             className="rounded border border-neutral-300 px-3 py-2 dark:border-neutral-700 dark:bg-neutral-900"
           />
         </label>
-        <Link
-          className="-mt-1 self-end text-xs text-neutral-500 underline"
-          href="/forgot"
-        >
-          Forgot password?
-        </Link>
         {error ? (
           <p
             role="alert"
@@ -56,16 +52,9 @@ export default async function LoginPage({
           type="submit"
           className="rounded bg-neutral-900 px-3 py-2 text-sm font-medium text-white hover:bg-neutral-700 dark:bg-white dark:text-neutral-900"
         >
-          Sign in
+          Update password
         </button>
       </form>
-
-      <p className="text-sm text-neutral-500">
-        No account?{" "}
-        <Link className="underline" href="/signup">
-          Create one
-        </Link>
-      </p>
     </main>
   );
 }

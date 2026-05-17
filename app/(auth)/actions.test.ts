@@ -3,6 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const signUp = vi.fn();
 const signInWithPassword = vi.fn();
 const signOut = vi.fn();
+const resetPasswordForEmail = vi.fn();
+const updateUser = vi.fn();
 
 vi.mock("next/navigation", () => ({
   redirect: (target: string) => {
@@ -10,15 +12,33 @@ vi.mock("next/navigation", () => ({
   },
 }));
 
+vi.mock("next/headers", () => ({
+  headers: async () =>
+    new Map([
+      ["x-forwarded-proto", "https"],
+      ["host", "khaos-id.test"],
+    ]),
+}));
+
 vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({
-    auth: { signUp, signInWithPassword, signOut },
+    auth: {
+      signUp,
+      signInWithPassword,
+      signOut,
+      resetPasswordForEmail,
+      updateUser,
+    },
   }),
 }));
 
-const { loginAction, logoutAction, signupAction } = await import(
-  "@/app/(auth)/actions"
-);
+const {
+  loginAction,
+  logoutAction,
+  requestPasswordResetAction,
+  signupAction,
+  updatePasswordAction,
+} = await import("@/app/(auth)/actions");
 
 function fd(values: Record<string, string>): FormData {
   const f = new FormData();
@@ -42,6 +62,8 @@ beforeEach(() => {
   signUp.mockReset();
   signInWithPassword.mockReset();
   signOut.mockReset();
+  resetPasswordForEmail.mockReset();
+  updateUser.mockReset();
 });
 
 describe("signupAction", () => {
@@ -114,5 +136,76 @@ describe("logoutAction", () => {
     const target = await captureRedirect(logoutAction());
     expect(target).toBe("/");
     expect(signOut).toHaveBeenCalled();
+  });
+});
+
+describe("requestPasswordResetAction", () => {
+  it("triggers Supabase recovery and redirects to neutral confirmation", async () => {
+    resetPasswordForEmail.mockResolvedValue({ data: {}, error: null });
+    const target = await captureRedirect(
+      requestPasswordResetAction(fd({ email: " a@b.com " })),
+    );
+    expect(target).toBe("/forgot?sent=1");
+    expect(resetPasswordForEmail).toHaveBeenCalledWith("a@b.com", {
+      redirectTo: "https://khaos-id.test/reset",
+    });
+  });
+
+  it("yields the same neutral confirmation when Supabase reports an error (no enumeration)", async () => {
+    resetPasswordForEmail.mockResolvedValue({
+      data: null,
+      error: { message: "User not found" },
+    });
+    const target = await captureRedirect(
+      requestPasswordResetAction(fd({ email: "ghost@b.com" })),
+    );
+    expect(target).toBe("/forgot?sent=1");
+  });
+
+  it("rejects missing email before hitting Supabase", async () => {
+    const target = await captureRedirect(
+      requestPasswordResetAction(fd({})),
+    );
+    expect(target).toMatch(/^\/forgot\?error=/);
+    expect(resetPasswordForEmail).not.toHaveBeenCalled();
+  });
+});
+
+describe("updatePasswordAction", () => {
+  it("redirects to /account on success", async () => {
+    updateUser.mockResolvedValue({ data: {}, error: null });
+    const target = await captureRedirect(
+      updatePasswordAction(fd({ password: "pw-abc-123" })),
+    );
+    expect(target).toBe("/account");
+    expect(updateUser).toHaveBeenCalledWith({ password: "pw-abc-123" });
+  });
+
+  it("redirects back with error when Supabase rejects", async () => {
+    updateUser.mockResolvedValue({
+      data: null,
+      error: { message: "Recovery session expired" },
+    });
+    const target = await captureRedirect(
+      updatePasswordAction(fd({ password: "pw-abc-123" })),
+    );
+    expect(target).toBe(
+      "/reset/confirm?error=" +
+        encodeURIComponent("Recovery session expired"),
+    );
+  });
+
+  it("rejects short password before hitting Supabase", async () => {
+    const target = await captureRedirect(
+      updatePasswordAction(fd({ password: "short" })),
+    );
+    expect(target).toMatch(/^\/reset\/confirm\?error=/);
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it("rejects empty password before hitting Supabase", async () => {
+    const target = await captureRedirect(updatePasswordAction(fd({})));
+    expect(target).toMatch(/^\/reset\/confirm\?error=/);
+    expect(updateUser).not.toHaveBeenCalled();
   });
 });
