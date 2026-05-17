@@ -175,10 +175,10 @@ describe("updatePasswordAction", () => {
   it("redirects to /account on success", async () => {
     updateUser.mockResolvedValue({ data: {}, error: null });
     const target = await captureRedirect(
-      updatePasswordAction(fd({ password: "new-secret-123" })),
+      updatePasswordAction(fd({ password: "pw-abc-123" })),
     );
     expect(target).toBe("/account");
-    expect(updateUser).toHaveBeenCalledWith({ password: "new-secret-123" });
+    expect(updateUser).toHaveBeenCalledWith({ password: "pw-abc-123" });
   });
 
   it("redirects back with error when Supabase rejects", async () => {
@@ -187,7 +187,7 @@ describe("updatePasswordAction", () => {
       error: { message: "Recovery session expired" },
     });
     const target = await captureRedirect(
-      updatePasswordAction(fd({ password: "new-secret-123" })),
+      updatePasswordAction(fd({ password: "pw-abc-123" })),
     );
     expect(target).toBe(
       "/reset/confirm?error=" +
