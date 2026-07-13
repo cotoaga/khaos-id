@@ -104,3 +104,24 @@ export async function updatePasswordAction(formData: FormData): Promise<void> {
   if (error) bounceWithError("/reset/confirm", error.message);
   redirect("/account");
 }
+
+const SESSION_LIFETIME_PREFS = ["1h", "1d", "7d"] as const;
+type SessionLifetimePref = (typeof SESSION_LIFETIME_PREFS)[number];
+
+export async function updateSessionLifetimePrefAction(
+  _prev: { ok: boolean; error?: string } | null,
+  formData: FormData,
+): Promise<{ ok: boolean; error?: string }> {
+  const raw = formData.get("pref");
+  if (!SESSION_LIFETIME_PREFS.includes(raw as SessionLifetimePref)) {
+    return { ok: false, error: "Invalid preference value." };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({
+    data: { session_lifetime_pref: raw as SessionLifetimePref },
+  });
+
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
+}

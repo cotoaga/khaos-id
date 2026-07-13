@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { verifyAccessToken } from "@/lib/jwt";
+import { SessionLifetimeControl } from "./SessionLifetimeControl";
 
 interface ClaimRow {
   label: string;
@@ -9,6 +10,8 @@ interface ClaimRow {
 
 const CORE_CLAIMS = ["sub", "email", "aud", "iss", "exp", "iat", "role"];
 
+type SessionPref = "1h" | "1d" | "7d";
+
 function formatClaim(key: string, value: unknown): string {
   if (value === undefined || value === null) return "—";
   if ((key === "exp" || key === "iat") && typeof value === "number") {
@@ -16,6 +19,19 @@ function formatClaim(key: string, value: unknown): string {
   }
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
+}
+
+function resolveSessionPref(meta: unknown): SessionPref {
+  const VALID: SessionPref[] = ["1h", "1d", "7d"];
+  if (
+    meta &&
+    typeof meta === "object" &&
+    "session_lifetime_pref" in meta &&
+    VALID.includes((meta as Record<string, unknown>).session_lifetime_pref as SessionPref)
+  ) {
+    return (meta as Record<string, unknown>).session_lifetime_pref as SessionPref;
+  }
+  return "1h";
 }
 
 export default async function AccountPage() {
@@ -51,6 +67,8 @@ export default async function AccountPage() {
     .filter((k) => !CORE_CLAIMS.includes(k))
     .sort()
     .map((key) => ({ label: key, value: formatClaim(key, claims[key]) }));
+
+  const currentPref = resolveSessionPref(claims.user_metadata);
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-12">
@@ -131,6 +149,15 @@ export default async function AccountPage() {
           </dl>
         </section>
       ) : null}
+
+      <section className="bg-bg-card border border-white/10 p-4">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+          Session lifetime
+        </h2>
+        <div className="mt-3">
+          <SessionLifetimeControl current={currentPref} />
+        </div>
+      </section>
 
       <div className="flex items-center justify-between pt-2">
         <form action="/logout" method="post">
