@@ -55,7 +55,6 @@ All four must pass. If any fail → fix → re-run → green → commit. No exce
 - MFA, passkeys, OAuth providers
 - Admin views (user list, role assignment)
 - Sibling integrations (proven via the doc snippet only — don't bundle siblings here)
-- Production deployment, custom domain, TLS
 
 ## Ecosystem Seeds
 

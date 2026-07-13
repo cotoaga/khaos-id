@@ -77,7 +77,7 @@ The sibling joins its own data to `claims.sub`. It does not (and must not) creat
 ## Cookie scope in dev vs prod
 
 - **Local dev:** `localhost` shares cookies across ports automatically. The sibling on `:3001` will see khaos-id's auth cookie at `:3000` only if it runs on the same Next.js dev server (or you use a reverse proxy). For multi-port local testing, browse khaos-id, sign in, then visit the sibling — most browsers scope `localhost` strictly. Production solves this via a shared parent domain (`.cotoaga.ai`); local dev usually uses a single Next app embedding the sibling for demo purposes.
-- **Production (out of scope here):** cookie domain is set to `.cotoaga.ai`; the JWKS URL is `https://auth.cotoaga.ai/auth/v1/.well-known/jwks.json`. Everything else is the same.
+- **Production (out of scope here):** cookie domain is set to `.cotoaga.ai`; the JWKS URL is the Supabase Cloud project endpoint `https://uwgykeijsejiitwmvzrl.supabase.co/auth/v1/.well-known/jwks.json` (see `docs/deployment.md` and `docs/adr/0003-hosted-supabase-substrate.md`). Everything else is the same.
 
 ---
 

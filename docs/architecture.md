@@ -59,7 +59,7 @@
 - `npm run supabase:keys`: writes an ES256 private JWK to `supabase/signing_keys.json` (gitignored).
 - Public half is exposed at `http://127.0.0.1:54321/auth/v1/.well-known/jwks.json` once `supabase start` is running.
 
-When this repo gets a production deployment (separate issue), GoTrue's JWKS endpoint will be at `https://auth.<domain>/auth/v1/.well-known/jwks.json` and every sibling will point its `SUPABASE_JWKS_URL` at that URL. Nothing about the verification code changes — that's the point of the federation.
+Production is live (Supabase Cloud, project `uwgykeijsejiitwmvzrl`, region `eu-west-1` — see `docs/adr/0003-hosted-supabase-substrate.md`). The production JWKS endpoint is `https://uwgykeijsejiitwmvzrl.supabase.co/auth/v1/.well-known/jwks.json`, and every sibling points its `SUPABASE_JWKS_URL` there. A vanity `auth.cotoaga.ai` face over this endpoint is deliberately deferred — it buys nothing today and exists only as the future indirection seam for a possible Supabase→Hetzner substrate migration (ADR-0003 triggers). Nothing about the verification code changes regardless of which URL `SUPABASE_JWKS_URL` resolves to — that's the point of the federation.
 
 ## What is *not* in this repo (and never should be)
 

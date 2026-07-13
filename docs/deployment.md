@@ -1,6 +1,6 @@
 # Deployment — khaos-id
 
-How the production proof-of-shape at <https://khaos-id.vercel.app> is wired. Captured retroactively for [COT-46](https://linear.app/cotoaganet/issue/COT-46) — the first deploy happened during exploration before a Linear issue existed; this file closes the calibration gap.
+How the production proof-of-shape at <https://id.cotoaga.ai> is wired. Captured retroactively for [COT-46](https://linear.app/cotoaganet/issue/COT-46) — the first deploy happened during exploration before a Linear issue existed; this file closes the calibration gap.
 
 ## Hosting
 
@@ -11,9 +11,9 @@ How the production proof-of-shape at <https://khaos-id.vercel.app> is wired. Cap
 
 | Surface | URL |
 |---|---|
-| Primary production | <https://khaos-id.vercel.app> |
+| Primary production | <https://id.cotoaga.ai> |
+| Vercel deployment | `khaos-id.vercel.app` — underlying Vercel URL; `id.cotoaga.ai` is the custom domain in front of it |
 | Vercel-generated aliases | `khaos-id-cotoagadotnet.vercel.app`, `khaos-id-cotoaga-net-cotoagadotnet.vercel.app` |
-| Future custom domain | `https://id.cotoaga.ai` (DNS cutover is a separate issue, out of scope here) |
 | Supabase Auth (production) | `https://uwgykeijsejiitwmvzrl.supabase.co` |
 | JWKS endpoint | `https://uwgykeijsejiitwmvzrl.supabase.co/auth/v1/.well-known/jwks.json` |
 
@@ -23,7 +23,7 @@ Vercel defaults — no `vercel.ts` override.
 
 | Branch | Vercel environment | URL |
 |---|---|---|
-| `main` | **Production** | `https://khaos-id.vercel.app` |
+| `main` | **Production** | `https://id.cotoaga.ai` |
 | any other branch / PR | **Preview** | `https://khaos-<hash>-cotoagadotnet.vercel.app` |
 | local | **Development** | `http://localhost:3000` (uses local Supabase via `supabase start`) |
 
@@ -89,6 +89,6 @@ This split is intentional (cloud config is dashboard-managed, not file-managed i
 
 ## What is *not* documented here
 
-- Custom-domain cutover for `id.cotoaga.ai` — separate issue.
+- Custom-domain cutover for `id.cotoaga.ai` — done; live and reflected in the URLs table above.
 - Observability / runtime logs piping — Pluto's job when Pluto exists.
 - A managed migration path to self-hosted Hetzner — see `docs/adr/0003-hosted-supabase-substrate.md` for the trigger conditions; the migration itself gets its own issue when those triggers fire.
