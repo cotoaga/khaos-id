@@ -1,26 +1,60 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Canonical cotoaga.ai tokens — seed-style.md v2.1. Do not invent values here. */
+  --cotoaga-green: #00A86B;
+  --cotoaga-blue: #0088FF;
+  --cotoaga-cyan: #00D4FF;
+  --cotoaga-ai-success: #098A5E;
+  --cotoaga-ai-info: #2F67B2;
+  --cotoaga-ai-sand: #EB9929;
+  --cotoaga-ai-white: #FAFBFB;
+  --cotoaga-ai-grey-light: #8A8A8A;
+  --cotoaga-ai-grey: #4A4A4A;
+  --cotoaga-ai-dark-marine: #16213E;
+  --cotoaga-ai-deep-sky: #191A2E;
+
+  /* Dark-theme role mapping (seed's Token Mapping — Dark Theme table) */
+  --bg-primary: var(--cotoaga-ai-deep-sky);
+  --bg-card: var(--cotoaga-ai-dark-marine);
+  --cta: var(--cotoaga-green);
+  --accent: var(--cotoaga-ai-sand);
+  --hero: var(--cotoaga-cyan);
+  --text-primary: var(--cotoaga-ai-white);
+  --text-secondary: var(--cotoaga-ai-grey-light);
+  --success: var(--cotoaga-ai-success);
+  --info: var(--cotoaga-ai-info);
+  --link: var(--cotoaga-blue);
+  --dormant: var(--cotoaga-ai-grey);
+  /* Not in the seed — no dark-theme hex is defined for form-validation red.
+     Pragmatic exception per seed's "red reserved for critical errors" guidance. */
+  --danger: #EF4444;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-bg-primary: var(--bg-primary);
+  --color-bg-card: var(--bg-card);
+  --color-cta: var(--cta);
+  --color-accent: var(--accent);
+  --color-hero: var(--hero);
+  --color-code: var(--hero);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-success: var(--success);
+  --color-info: var(--info);
+  --color-link: var(--link);
+  --color-dormant: var(--dormant);
+  --color-danger: var(--danger);
+  --font-heading: var(--font-space-grotesk);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-jetbrains-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* Non-negotiable: zero border radius everywhere */
+*, *::before, *::after { border-radius: 0 !important; }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-inter), system-ui, sans-serif;
 }
