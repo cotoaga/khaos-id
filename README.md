@@ -4,7 +4,7 @@ Federated identity for the KHAOS ecosystem. Email + password auth on top of a lo
 
 This repo is the proof-of-shape for **Architecture B** — see `docs/architecture.md` and `docs/adr/0001-federated-jwt-supabase.md`.
 
-Production: <https://khaos-id.vercel.app> (eventually `https://id.cotoaga.ai`). Hosted on Vercel with a Supabase Cloud substrate — see `docs/deployment.md` and `docs/adr/0003-hosted-supabase-substrate.md`.
+Production: <https://id.cotoaga.ai> (Vercel deployment, also reachable at `khaos-id.vercel.app`). Hosted on Vercel with a Supabase Cloud substrate — see `docs/deployment.md` and `docs/adr/0003-hosted-supabase-substrate.md`.
 
 ## Local development
 
