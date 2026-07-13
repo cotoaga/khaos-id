@@ -55,82 +55,99 @@ export default async function AccountPage() {
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-12">
       <header className="space-y-1">
-        <h1 className="text-2xl font-semibold">Account</h1>
-        <p className="text-sm text-neutral-500">
+        <h1 className="font-heading text-2xl font-semibold text-hero">
+          Account
+        </h1>
+        <p className="text-sm text-text-secondary">
           Identity surface for federated JWT (Architecture B). Everything below
           comes from the access token the browser holds via httpOnly cookie.
         </p>
       </header>
 
-      <section className="rounded border border-neutral-200 p-4 dark:border-neutral-800">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+      <section className="bg-bg-card border border-white/10 p-4">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
           JWKS verification
         </h2>
         {verificationStatus === "verified" ? (
           <p className="mt-2 text-sm">
-            <span className="font-medium text-green-700 dark:text-green-400">
-              Signature verified
-            </span>{" "}
-            against <code>{process.env.SUPABASE_JWKS_URL}</code>
+            <span className="font-medium text-success">Signature verified</span>{" "}
+            against{" "}
+            <code className="font-mono text-xs text-code">
+              {process.env.SUPABASE_JWKS_URL}
+            </code>
             {alg ? (
               <>
                 {" "}
-                · alg <code>{alg}</code>
+                · alg{" "}
+                <code className="font-mono text-xs text-code">{alg}</code>
               </>
             ) : null}
             {kid ? (
               <>
                 {" "}
-                · kid <code>{kid}</code>
+                · kid{" "}
+                <code className="font-mono text-xs text-code">{kid}</code>
               </>
             ) : null}
             .
           </p>
         ) : (
-          <p className="mt-2 text-sm text-red-700 dark:text-red-400">
+          <p className="mt-2 text-sm text-danger">
             Signature verification failed: {verificationError}
           </p>
         )}
       </section>
 
-      <section className="rounded border border-neutral-200 p-4 dark:border-neutral-800">
-        <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+      <section className="bg-bg-card border border-white/10 p-4">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
           Core claims
         </h2>
         <dl className="mt-2 grid grid-cols-[8rem_1fr] gap-x-3 gap-y-1 text-sm">
           {coreRows.map((row) => (
             <div key={row.label} className="contents">
-              <dt className="font-mono text-neutral-500">{row.label}</dt>
-              <dd className="break-all font-mono">{row.value}</dd>
+              <dt className="font-mono text-text-secondary">{row.label}</dt>
+              <dd className="break-all font-mono text-text-primary">
+                {row.value}
+              </dd>
             </div>
           ))}
         </dl>
       </section>
 
       {extraRows.length > 0 ? (
-        <section className="rounded border border-neutral-200 p-4 dark:border-neutral-800">
-          <h2 className="text-sm font-semibold uppercase tracking-wide text-neutral-500">
+        <section className="bg-bg-card border border-white/10 p-4">
+          <h2 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
             Other claims
           </h2>
           <dl className="mt-2 grid grid-cols-[8rem_1fr] gap-x-3 gap-y-1 text-sm">
             {extraRows.map((row) => (
               <div key={row.label} className="contents">
-                <dt className="font-mono text-neutral-500">{row.label}</dt>
-                <dd className="break-all font-mono">{row.value}</dd>
+                <dt className="font-mono text-text-secondary">{row.label}</dt>
+                <dd className="break-all font-mono text-text-primary">
+                  {row.value}
+                </dd>
               </div>
             ))}
           </dl>
         </section>
       ) : null}
 
-      <form action="/logout" method="post">
-        <button
-          type="submit"
-          className="rounded border border-neutral-300 px-3 py-2 text-sm hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800"
+      <div className="flex items-center justify-between pt-2">
+        <form action="/logout" method="post">
+          <button
+            type="submit"
+            className="border border-dormant px-3 py-2 text-sm text-text-secondary transition-colors hover:border-accent hover:text-accent"
+          >
+            Sign out
+          </button>
+        </form>
+        <a
+          href="https://khaos-pluto.cotoaga.ai/"
+          className="text-sm text-link transition-opacity hover:opacity-70"
         >
-          Sign out
-        </button>
-      </form>
+          ↗ KHAOS-Pluto
+        </a>
+      </div>
     </main>
   );
 }
