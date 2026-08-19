@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "deny": [
+      "mcp__supabase__apply_migration",
+      "mcp__supabase__execute_sql",
+      "Bash(supabase db *)",
+      "Bash(supabase migration up*)",
+      "Bash(supabase db query --linked*)"
+    ]
+  }
+}
