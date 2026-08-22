@@ -4,9 +4,9 @@ import { loginAction } from "@/app/(auth)/actions";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string }>;
+  searchParams: Promise<{ error?: string; expired?: string }>;
 }) {
-  const { error } = await searchParams;
+  const { error, expired } = await searchParams;
 
   return (
     <main className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-6 px-6 py-16">
@@ -18,6 +18,15 @@ export default async function LoginPage({
           Existing identity from khaos-id Supabase Auth.
         </p>
       </header>
+
+      {expired ? (
+        <p
+          role="status"
+          className="border border-info bg-info/10 px-3 py-2 text-sm text-info"
+        >
+          Session abgelaufen — please sign in again.
+        </p>
+      ) : null}
 
       <form action={loginAction} className="flex flex-col gap-3">
         <label className="flex flex-col gap-1 text-sm text-text-secondary">

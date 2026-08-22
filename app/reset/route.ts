@@ -1,6 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
+import { mintAndSetSessionDeadlineCookie } from "@/lib/session-deadline";
 
 // Token-hash flow rather than PKCE: the verifier is server-derived from the
 // hash itself, so the email can be opened in a different browser than the one
@@ -19,7 +20,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   }
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.verifyOtp({
+  const { data, error } = await supabase.auth.verifyOtp({
     type,
     token_hash: tokenHash,
   });
@@ -31,6 +32,10 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       ),
     );
   }
+
+  // verifyOtp establishes a live session here, outside loginAction — it
+  // needs its own deadline cookie or middleware will immediately kill it.
+  await mintAndSetSessionDeadlineCookie(data.user?.user_metadata);
 
   return NextResponse.redirect(new URL("/reset/confirm", request.url));
 }

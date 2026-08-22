@@ -3,6 +3,11 @@
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import {
+  mintAndSetSessionDeadlineCookie,
+  SESSION_LIFETIME_PREFS,
+  type SessionLifetimePref,
+} from "@/lib/session-deadline";
 
 function readCredentials(formData: FormData): {
   email: string;
@@ -45,12 +50,15 @@ export async function signupAction(formData: FormData): Promise<void> {
   if (!creds) bounceWithError("/signup", "Email and password are required.");
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signUp({
+  const { data, error } = await supabase.auth.signUp({
     email: creds.email,
     password: creds.password,
   });
 
   if (error) bounceWithError("/signup", error.message);
+  // Email confirmation is out of scope today, so signUp establishes a live
+  // session immediately — but guard on data.session in case that changes.
+  if (data.session) await mintAndSetSessionDeadlineCookie(data.user?.user_metadata);
   redirect("/account");
 }
 
@@ -59,12 +67,13 @@ export async function loginAction(formData: FormData): Promise<void> {
   if (!creds) bounceWithError("/login", "Email and password are required.");
 
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data, error } = await supabase.auth.signInWithPassword({
     email: creds.email,
     password: creds.password,
   });
 
   if (error) bounceWithError("/login", error.message);
+  await mintAndSetSessionDeadlineCookie(data.user?.user_metadata);
   redirect("/account");
 }
 
@@ -103,4 +112,23 @@ export async function updatePasswordAction(formData: FormData): Promise<void> {
 
   if (error) bounceWithError("/reset/confirm", error.message);
   redirect("/account");
+}
+
+export async function updateSessionLifetimePrefAction(
+  _prev: { ok: boolean; error?: string } | null,
+  formData: FormData,
+): Promise<{ ok: boolean; error?: string }> {
+  const raw = formData.get("pref");
+  if (!SESSION_LIFETIME_PREFS.includes(raw as SessionLifetimePref)) {
+    return { ok: false, error: "Invalid preference value." };
+  }
+
+  // Applies to the next login only — never extends the running session.
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({
+    data: { session_lifetime_pref: raw as SessionLifetimePref },
+  });
+
+  if (error) return { ok: false, error: error.message };
+  return { ok: true };
 }

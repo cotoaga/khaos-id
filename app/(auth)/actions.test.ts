@@ -5,6 +5,7 @@ const signInWithPassword = vi.fn();
 const signOut = vi.fn();
 const resetPasswordForEmail = vi.fn();
 const updateUser = vi.fn();
+const cookieSet = vi.fn();
 
 vi.mock("next/navigation", () => ({
   redirect: (target: string) => {
@@ -18,6 +19,7 @@ vi.mock("next/headers", () => ({
       ["x-forwarded-proto", "https"],
       ["host", "khaos-id.test"],
     ]),
+  cookies: async () => ({ set: cookieSet }),
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -32,13 +34,17 @@ vi.mock("@/lib/supabase/server", () => ({
   }),
 }));
 
+process.env.SESSION_DEADLINE_SECRET = "test-secret-do-not-use-in-prod";
+
 const {
   loginAction,
   logoutAction,
   requestPasswordResetAction,
   signupAction,
   updatePasswordAction,
+  updateSessionLifetimePrefAction,
 } = await import("@/app/(auth)/actions");
+const { SESSION_DEADLINE_COOKIE } = await import("@/lib/session-deadline");
 
 function fd(values: Record<string, string>): FormData {
   const f = new FormData();
@@ -64,11 +70,15 @@ beforeEach(() => {
   signOut.mockReset();
   resetPasswordForEmail.mockReset();
   updateUser.mockReset();
+  cookieSet.mockReset();
 });
 
 describe("signupAction", () => {
-  it("redirects to /account on success", async () => {
-    signUp.mockResolvedValue({ error: null });
+  it("redirects to /account and mints a deadline cookie on success", async () => {
+    signUp.mockResolvedValue({
+      data: { user: { user_metadata: {} }, session: {} },
+      error: null,
+    });
     const target = await captureRedirect(
       signupAction(fd({ email: " a@b.com ", password: "secret-123" })),
     );
@@ -77,6 +87,22 @@ describe("signupAction", () => {
       email: "a@b.com",
       password: "secret-123",
     });
+    expect(cookieSet).toHaveBeenCalledWith(
+      SESSION_DEADLINE_COOKIE,
+      expect.any(String),
+      expect.objectContaining({ maxAge: 60 * 60 * 24 }),
+    );
+  });
+
+  it("does not mint a cookie when signUp requires email confirmation (no session yet)", async () => {
+    signUp.mockResolvedValue({
+      data: { user: { user_metadata: {} }, session: null },
+      error: null,
+    });
+    await captureRedirect(
+      signupAction(fd({ email: "a@b.com", password: "secret-123" })),
+    );
+    expect(cookieSet).not.toHaveBeenCalled();
   });
 
   it("redirects back with error when Supabase rejects", async () => {
@@ -97,8 +123,11 @@ describe("signupAction", () => {
 });
 
 describe("loginAction", () => {
-  it("redirects to /account on success", async () => {
-    signInWithPassword.mockResolvedValue({ error: null });
+  it("redirects to /account and mints a deadline cookie from the user's preference", async () => {
+    signInWithPassword.mockResolvedValue({
+      data: { user: { user_metadata: { session_lifetime_pref: "7d" } } },
+      error: null,
+    });
     const target = await captureRedirect(
       loginAction(fd({ email: "a@b.com", password: "secret-123" })),
     );
@@ -107,6 +136,26 @@ describe("loginAction", () => {
       email: "a@b.com",
       password: "secret-123",
     });
+    expect(cookieSet).toHaveBeenCalledWith(
+      SESSION_DEADLINE_COOKIE,
+      expect.any(String),
+      expect.objectContaining({ maxAge: 60 * 60 * 24 * 7 }),
+    );
+  });
+
+  it("defaults to the 1d deadline when no preference is stored", async () => {
+    signInWithPassword.mockResolvedValue({
+      data: { user: { user_metadata: {} } },
+      error: null,
+    });
+    await captureRedirect(
+      loginAction(fd({ email: "a@b.com", password: "secret-123" })),
+    );
+    expect(cookieSet).toHaveBeenCalledWith(
+      SESSION_DEADLINE_COOKIE,
+      expect.any(String),
+      expect.objectContaining({ maxAge: 60 * 60 * 24 }),
+    );
   });
 
   it("redirects back with error on invalid credentials", async () => {
@@ -119,6 +168,7 @@ describe("loginAction", () => {
     expect(target).toBe(
       "/login?error=" + encodeURIComponent("Invalid login credentials"),
     );
+    expect(cookieSet).not.toHaveBeenCalled();
   });
 
   it("rejects missing password before hitting Supabase", async () => {
@@ -127,6 +177,40 @@ describe("loginAction", () => {
     );
     expect(target).toMatch(/^\/login\?error=/);
     expect(signInWithPassword).not.toHaveBeenCalled();
+  });
+});
+
+describe("updateSessionLifetimePrefAction", () => {
+  it("persists a valid preference to user_metadata", async () => {
+    updateUser.mockResolvedValue({ error: null });
+    const result = await updateSessionLifetimePrefAction(
+      null,
+      fd({ pref: "7d" }),
+    );
+    expect(result).toEqual({ ok: true });
+    expect(updateUser).toHaveBeenCalledWith({
+      data: { session_lifetime_pref: "7d" },
+    });
+    // Preference changes never retroactively extend the running session.
+    expect(cookieSet).not.toHaveBeenCalled();
+  });
+
+  it("rejects a value outside the preset list without calling Supabase", async () => {
+    const result = await updateSessionLifetimePrefAction(
+      null,
+      fd({ pref: "30d" }),
+    );
+    expect(result.ok).toBe(false);
+    expect(updateUser).not.toHaveBeenCalled();
+  });
+
+  it("surfaces a Supabase error", async () => {
+    updateUser.mockResolvedValue({ error: { message: "Not authenticated" } });
+    const result = await updateSessionLifetimePrefAction(
+      null,
+      fd({ pref: "1h" }),
+    );
+    expect(result).toEqual({ ok: false, error: "Not authenticated" });
   });
 });
 

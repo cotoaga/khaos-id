@@ -1,7 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { SESSION_DEADLINE_COOKIE, safeVerifySessionDeadline } from "@/lib/session-deadline";
 
 const PROTECTED_PREFIXES = ["/account"];
+// /logout already tears the session down itself; don't race it into a
+// different redirect target.
+const DEADLINE_EXEMPT_PATHS = ["/logout"];
 
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -42,6 +46,19 @@ export async function middleware(request: NextRequest) {
     url.pathname = "/login";
     url.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(url);
+  }
+
+  if (user && !DEADLINE_EXEMPT_PATHS.includes(pathname)) {
+    const verified = await safeVerifySessionDeadline(
+      request.cookies.get(SESSION_DEADLINE_COOKIE)?.value,
+    );
+    if (!verified) {
+      await supabase.auth.signOut();
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      url.searchParams.set("expired", "1");
+      return NextResponse.redirect(url);
+    }
   }
 
   return response;
