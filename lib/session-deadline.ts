@@ -89,8 +89,8 @@ export function sessionDeadlineCookieOptions(maxAge: number) {
   };
 }
 
-// Called from every place a live session is established: loginAction,
-// signupAction, and the recovery-link verifyOtp exchange.
+// Called from every place a live session is established: loginAction and
+// the recovery-link verifyOtp exchange.
 export async function mintAndSetSessionDeadlineCookie(userMetadata: unknown): Promise<void> {
   const pref = resolveSessionLifetimePref(userMetadata);
   const { token, maxAge } = await mintSessionDeadline(pref);

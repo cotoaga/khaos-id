@@ -1,6 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const signUp = vi.fn();
 const signInWithPassword = vi.fn();
 const signOut = vi.fn();
 const resetPasswordForEmail = vi.fn();
@@ -25,7 +24,6 @@ vi.mock("next/headers", () => ({
 vi.mock("@/lib/supabase/server", () => ({
   createClient: async () => ({
     auth: {
-      signUp,
       signInWithPassword,
       signOut,
       resetPasswordForEmail,
@@ -40,7 +38,6 @@ const {
   loginAction,
   logoutAction,
   requestPasswordResetAction,
-  signupAction,
   updatePasswordAction,
   updateSessionLifetimePrefAction,
 } = await import("@/app/(auth)/actions");
@@ -65,61 +62,11 @@ async function captureRedirect(promise: Promise<unknown>): Promise<string> {
 }
 
 beforeEach(() => {
-  signUp.mockReset();
   signInWithPassword.mockReset();
   signOut.mockReset();
   resetPasswordForEmail.mockReset();
   updateUser.mockReset();
   cookieSet.mockReset();
-});
-
-describe("signupAction", () => {
-  it("redirects to /account and mints a deadline cookie on success", async () => {
-    signUp.mockResolvedValue({
-      data: { user: { user_metadata: {} }, session: {} },
-      error: null,
-    });
-    const target = await captureRedirect(
-      signupAction(fd({ email: " a@b.com ", password: "secret-123" })),
-    );
-    expect(target).toBe("/account");
-    expect(signUp).toHaveBeenCalledWith({
-      email: "a@b.com",
-      password: "secret-123",
-    });
-    expect(cookieSet).toHaveBeenCalledWith(
-      SESSION_DEADLINE_COOKIE,
-      expect.any(String),
-      expect.objectContaining({ maxAge: 60 * 60 * 24 }),
-    );
-  });
-
-  it("does not mint a cookie when signUp requires email confirmation (no session yet)", async () => {
-    signUp.mockResolvedValue({
-      data: { user: { user_metadata: {} }, session: null },
-      error: null,
-    });
-    await captureRedirect(
-      signupAction(fd({ email: "a@b.com", password: "secret-123" })),
-    );
-    expect(cookieSet).not.toHaveBeenCalled();
-  });
-
-  it("redirects back with error when Supabase rejects", async () => {
-    signUp.mockResolvedValue({ error: { message: "User already registered" } });
-    const target = await captureRedirect(
-      signupAction(fd({ email: "a@b.com", password: "secret-123" })),
-    );
-    expect(target).toBe(
-      "/signup?error=" + encodeURIComponent("User already registered"),
-    );
-  });
-
-  it("rejects empty credentials before hitting Supabase", async () => {
-    const target = await captureRedirect(signupAction(fd({})));
-    expect(target).toMatch(/^\/signup\?error=/);
-    expect(signUp).not.toHaveBeenCalled();
-  });
 });
 
 describe("loginAction", () => {

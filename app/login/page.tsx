@@ -73,8 +73,8 @@ export default async function LoginPage({
 
       <p className="text-sm text-text-secondary">
         No account?{" "}
-        <Link className="text-link underline" href="/signup">
-          Create one
+        <Link className="text-link underline" href="/request">
+          Request access
         </Link>
       </p>
     </main>
