@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
@@ -179,12 +180,20 @@ export default async function AccountPage() {
             Sign out
           </button>
         </form>
-        <a
-          href="https://khaos-pluto.cotoaga.ai/"
-          className="text-sm text-link transition-opacity hover:opacity-70"
-        >
-          ↗ KHAOS-Pluto
-        </a>
+        <div className="flex items-center gap-4">
+          <Link
+            href="/"
+            className="text-sm text-link transition-opacity hover:opacity-70"
+          >
+            ↗ Monad field
+          </Link>
+          <a
+            href="https://khaos-pluto.cotoaga.ai/"
+            className="text-sm text-link transition-opacity hover:opacity-70"
+          >
+            ↗ KHAOS-Pluto
+          </a>
+        </div>
       </div>
     </main>
   );

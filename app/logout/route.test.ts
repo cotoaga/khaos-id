@@ -16,18 +16,24 @@ beforeEach(() => {
 });
 
 describe("GET /logout", () => {
-  it("has no GET handler — Next.js returns 405 for methods a route doesn't export", () => {
-    expect((routeModule as Record<string, unknown>).GET).toBeUndefined();
+  it("redirects home without touching the session (CSRF: GET has no effect)", () => {
+    const res = routeModule.GET(
+      new NextRequest("https://id.cotoaga.ai/logout", { method: "GET" }),
+    );
+    expect(signOut).not.toHaveBeenCalled();
+    expect(res.status).toBe(303);
+    expect(res.headers.get("location")).toBe("https://id.cotoaga.ai/");
   });
 });
 
 describe("POST /logout", () => {
-  it("signs out and redirects home", async () => {
+  it("signs out and redirects home with 303 so the follow-up is a GET", async () => {
     signOut.mockResolvedValue({ error: null });
     const res = await routeModule.POST(
       new NextRequest("https://id.cotoaga.ai/logout", { method: "POST" }),
     );
     expect(signOut).toHaveBeenCalledOnce();
+    expect(res.status).toBe(303);
     expect(res.headers.get("location")).toBe("https://id.cotoaga.ai/");
   });
 
@@ -41,6 +47,7 @@ describe("POST /logout", () => {
       "[logout] signOut failed:",
       "boom",
     );
+    expect(res.status).toBe(303);
     expect(res.headers.get("location")).toBe("https://id.cotoaga.ai/");
     consoleError.mockRestore();
   });
