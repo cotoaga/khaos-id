@@ -181,6 +181,14 @@ export default async function AccountPage() {
           </button>
         </form>
         <div className="flex items-center gap-4">
+          {claims.tier === "root" ? (
+            <Link
+              href="/invites"
+              className="text-sm text-link transition-opacity hover:opacity-70"
+            >
+              Guest invites
+            </Link>
+          ) : null}
           <Link
             href="/"
             className="text-sm text-link transition-opacity hover:opacity-70"

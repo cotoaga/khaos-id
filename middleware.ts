@@ -2,7 +2,7 @@ import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { SESSION_DEADLINE_COOKIE, safeVerifySessionDeadline } from "@/lib/session-deadline";
 
-const PROTECTED_PREFIXES = ["/account"];
+const PROTECTED_PREFIXES = ["/account", "/invites", "/review"];
 // /logout already tears the session down itself; don't race it into a
 // different redirect target.
 const DEADLINE_EXEMPT_PATHS = ["/logout"];
