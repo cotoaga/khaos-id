@@ -36,7 +36,7 @@ export default async function LoginPage({
             name="email"
             required
             autoComplete="email"
-            className="bg-bg-card border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none"
+            className="bg-bg-card border border-border px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none"
           />
         </label>
         <label className="flex flex-col gap-1 text-sm text-text-secondary">
@@ -46,7 +46,7 @@ export default async function LoginPage({
             name="password"
             required
             autoComplete="current-password"
-            className="bg-bg-card border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none"
+            className="bg-bg-card border border-border px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none"
           />
         </label>
         <Link

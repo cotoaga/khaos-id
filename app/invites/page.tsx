@@ -58,7 +58,7 @@ export default async function InvitesPage({
 
       <form
         action={inviteGuestAction}
-        className="flex flex-col gap-3 bg-bg-card border border-white/10 p-4"
+        className="flex flex-col gap-3 bg-bg-card border border-border p-4"
       >
         <label className="flex flex-col gap-1 text-sm text-text-secondary">
           Email
@@ -66,7 +66,7 @@ export default async function InvitesPage({
             type="email"
             name="email"
             required
-            className="bg-bg-card border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none"
+            className="bg-bg-card border border-border px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none"
           />
         </label>
         <button
@@ -77,7 +77,7 @@ export default async function InvitesPage({
         </button>
       </form>
 
-      <section className="bg-bg-card border border-white/10 p-4">
+      <section className="bg-bg-card border border-border p-4">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
           Pending invites
         </h2>
@@ -88,7 +88,7 @@ export default async function InvitesPage({
             {pending.map((invite) => (
               <li
                 key={invite.id}
-                className="flex items-center justify-between gap-3 border-t border-white/10 pt-3 first:border-0 first:pt-0"
+                className="flex items-center justify-between gap-3 border-t border-border pt-3 first:border-0 first:pt-0"
               >
                 <div className="text-sm">
                   <p className="text-text-primary">{invite.email}</p>
