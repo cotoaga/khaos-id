@@ -87,6 +87,8 @@ Auth URLs (site URL + redirect URLs) are configured in **two** locations and mus
 
 This split is intentional (cloud config is dashboard-managed, not file-managed in this repo) but is a real foot-gun — captured in [COT-47 / ADR-0002](https://linear.app/cotoaganet/issue/COT-47).
 
+Same split applies to the custom access-token hook (COT-150, `[auth.hook.custom_access_token]`): the SQL migration ships the function, but wiring it up on the hosted project requires Dashboard → Authentication → Hooks → enable "Custom Access Token" pointed at `public.custom_access_token_hook`. `config.toml` only governs local `supabase start`.
+
 ## What is *not* documented here
 
 - Custom-domain cutover for `id.cotoaga.ai` — done; live and reflected in the URLs table above.

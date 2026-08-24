@@ -14,7 +14,7 @@ interface ClaimRow {
   value: string;
 }
 
-const CORE_CLAIMS = ["sub", "email", "aud", "iss", "exp", "iat", "role"];
+const CORE_CLAIMS = ["sub", "email", "aud", "iss", "exp", "iat", "role", "tier"];
 
 function formatClaim(key: string, value: unknown): string {
   if (value === undefined || value === null) return "—";
