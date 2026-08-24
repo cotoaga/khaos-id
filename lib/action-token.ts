@@ -14,12 +14,17 @@ export const ACTION_TOKEN_PURPOSES = [
   "confirm_request",
   "review_request",
   "activate_visitor",
+  "confirm_email_change",
 ] as const;
 export type ActionTokenPurpose = (typeof ACTION_TOKEN_PURPOSES)[number];
 
 export interface ActionTokenPayload {
   sub: string;
   purpose: ActionTokenPurpose;
+  // Only carried by "confirm_email_change" — the address being confirmed.
+  // Keeping it in the signed token (rather than a DB write) means the old
+  // address stays the account's email until this exact link is clicked.
+  newEmail?: string;
 }
 
 function secretKey(): Uint8Array {
@@ -37,7 +42,7 @@ export async function mintActionToken(
   expiresInSeconds: number,
   now: number = Math.floor(Date.now() / 1000),
 ): Promise<string> {
-  return new SignJWT({ purpose: payload.purpose })
+  return new SignJWT({ purpose: payload.purpose, newEmail: payload.newEmail })
     .setProtectedHeader({ alg: "HS256" })
     .setSubject(payload.sub)
     .setIssuedAt(now)
@@ -57,6 +62,12 @@ export async function verifyActionToken(
     throw new Error(
       `Action token purpose mismatch: expected "${expectedPurpose}", got "${String(payload.purpose)}"`,
     );
+  }
+  if (expectedPurpose === "confirm_email_change") {
+    if (typeof payload.newEmail !== "string" || !payload.newEmail) {
+      throw new Error("Malformed action token: missing newEmail");
+    }
+    return { sub: payload.sub, purpose: expectedPurpose, newEmail: payload.newEmail };
   }
   return { sub: payload.sub, purpose: expectedPurpose };
 }

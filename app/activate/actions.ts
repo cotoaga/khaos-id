@@ -6,11 +6,9 @@ import { createClient } from "@/lib/supabase/server";
 import { verifyActionToken, type ActionTokenPurpose } from "@/lib/action-token";
 import { mintAndSetSessionDeadlineCookie } from "@/lib/session-deadline";
 
-const EXPECTED_STATUS: Record<ActionTokenPurpose, string> = {
+const EXPECTED_STATUS: Record<Extract<ActionTokenPurpose, "invite" | "activate_visitor">, string> = {
   invite: "pending_invite",
   activate_visitor: "pending_activation",
-  confirm_request: "pending_confirmation",
-  review_request: "pending_review",
 };
 
 function bounce(token: string, error: string): never {

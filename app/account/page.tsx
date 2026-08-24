@@ -9,6 +9,14 @@ import {
   SESSION_DEADLINE_COOKIE,
 } from "@/lib/session-deadline";
 import { SessionLifetimeControl } from "./SessionLifetimeControl";
+import { updateProfileAction, requestEmailChangeAction } from "./actions";
+
+const ACCOUNT_DONE_MESSAGES: Record<string, string> = {
+  profileUpdated: "Profile updated.",
+  emailChangeSent:
+    "Confirmation mail sent to your new address. Your current email stays active until you confirm.",
+  emailChanged: "Email updated.",
+};
 
 interface ClaimRow {
   label: string;
@@ -37,7 +45,12 @@ function formatRemaining(deadline: number): string {
   return `${hours}h ${minutes}m remaining`;
 }
 
-export default async function AccountPage() {
+export default async function AccountPage({
+  searchParams,
+}: {
+  searchParams: Promise<Record<string, string | undefined>>;
+}) {
+  const params = await searchParams;
   const supabase = await createClient();
   const {
     data: { session },
@@ -77,6 +90,11 @@ export default async function AccountPage() {
     cookieStore.get(SESSION_DEADLINE_COOKIE)?.value,
   );
 
+  const profileName = session.user.user_metadata?.name ?? "";
+  const profileSurname = session.user.user_metadata?.surname ?? "";
+  const profileSource = session.user.app_metadata?.source ?? "—";
+  const doneKey = Object.keys(ACCOUNT_DONE_MESSAGES).find((key) => params[key]);
+
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-12">
       <header className="space-y-1">
@@ -89,7 +107,76 @@ export default async function AccountPage() {
         </p>
       </header>
 
-      <section className="bg-bg-card border border-white/10 p-4">
+      {doneKey ? <Banner text={ACCOUNT_DONE_MESSAGES[doneKey]} /> : null}
+      {params.error ? <Banner text={params.error} tone="danger" /> : null}
+
+      <section className="bg-bg-card border border-border p-4">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+          Profile
+        </h2>
+        <form action={updateProfileAction} className="mt-2 flex flex-col gap-3">
+          <label className="flex flex-col gap-1 text-sm text-text-secondary">
+            Name
+            <input
+              type="text"
+              name="name"
+              defaultValue={profileName}
+              required
+              className="bg-bg-card border border-border px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-sm text-text-secondary">
+            Surname
+            <input
+              type="text"
+              name="surname"
+              defaultValue={profileSurname}
+              required
+              className="bg-bg-card border border-border px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none"
+            />
+          </label>
+          <button
+            type="submit"
+            className="self-start bg-cta px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-accent"
+          >
+            Save profile
+          </button>
+        </form>
+
+        <dl className="mt-4 grid grid-cols-[8rem_1fr] gap-x-3 gap-y-1 text-sm">
+          <div className="contents">
+            <dt className="text-text-secondary">Source</dt>
+            <dd className="text-text-primary">{profileSource}</dd>
+          </div>
+          <div className="contents">
+            <dt className="text-text-secondary">Tier</dt>
+            <dd className="text-text-primary">{formatClaim("tier", claims.tier)}</dd>
+          </div>
+        </dl>
+
+        <form
+          action={requestEmailChangeAction}
+          className="mt-4 flex flex-col gap-3 border-t border-border pt-4"
+        >
+          <label className="flex flex-col gap-1 text-sm text-text-secondary">
+            New email (current: {session.user.email})
+            <input
+              type="email"
+              name="email"
+              required
+              className="bg-bg-card border border-border px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none"
+            />
+          </label>
+          <button
+            type="submit"
+            className="self-start bg-cta px-3 py-2 text-sm font-medium text-text-primary transition-colors hover:bg-accent"
+          >
+            Change email
+          </button>
+        </form>
+      </section>
+
+      <section className="bg-bg-card border border-border p-4">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
           JWKS verification
         </h2>
@@ -123,7 +210,7 @@ export default async function AccountPage() {
         )}
       </section>
 
-      <section className="bg-bg-card border border-white/10 p-4">
+      <section className="bg-bg-card border border-border p-4">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
           Core claims
         </h2>
@@ -140,7 +227,7 @@ export default async function AccountPage() {
       </section>
 
       {extraRows.length > 0 ? (
-        <section className="bg-bg-card border border-white/10 p-4">
+        <section className="bg-bg-card border border-border p-4">
           <h2 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
             Other claims
           </h2>
@@ -157,7 +244,7 @@ export default async function AccountPage() {
         </section>
       ) : null}
 
-      <section className="bg-bg-card border border-white/10 p-4">
+      <section className="bg-bg-card border border-border p-4">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
           Session lifetime
         </h2>
@@ -182,12 +269,20 @@ export default async function AccountPage() {
         </form>
         <div className="flex items-center gap-4">
           {claims.tier === "root" ? (
-            <Link
-              href="/invites"
-              className="text-sm text-link transition-opacity hover:opacity-70"
-            >
-              Guest invites
-            </Link>
+            <>
+              <Link
+                href="/admin/users"
+                className="text-sm text-link transition-opacity hover:opacity-70"
+              >
+                Users
+              </Link>
+              <Link
+                href="/invites"
+                className="text-sm text-link transition-opacity hover:opacity-70"
+              >
+                Guest invites
+              </Link>
+            </>
           ) : null}
           <Link
             href="/"
@@ -204,5 +299,20 @@ export default async function AccountPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+function Banner({ text, tone = "success" }: { text: string; tone?: "success" | "danger" }) {
+  return (
+    <p
+      role={tone === "danger" ? "alert" : "status"}
+      className={`border px-3 py-2 text-sm ${
+        tone === "danger"
+          ? "border-danger bg-danger/10 text-danger"
+          : "border-success bg-success/10 text-success"
+      }`}
+    >
+      {text}
+    </p>
   );
 }

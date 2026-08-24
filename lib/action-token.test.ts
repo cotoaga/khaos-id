@@ -66,4 +66,27 @@ describe("mintActionToken / verifyActionToken", () => {
       mintActionToken({ sub: "user-123", purpose: "invite" }, 60),
     ).rejects.toThrow(/ACTION_TOKEN_SECRET/);
   });
+
+  it("round-trips a confirm_email_change token carrying newEmail", async () => {
+    const token = await mintActionToken(
+      { sub: "user-123", purpose: "confirm_email_change", newEmail: "new@example.com" },
+      60,
+    );
+    const payload = await verifyActionToken(token, "confirm_email_change");
+    expect(payload).toEqual({
+      sub: "user-123",
+      purpose: "confirm_email_change",
+      newEmail: "new@example.com",
+    });
+  });
+
+  it("rejects a confirm_email_change token minted without newEmail", async () => {
+    const token = await mintActionToken(
+      { sub: "user-123", purpose: "confirm_email_change" },
+      60,
+    );
+    await expect(
+      verifyActionToken(token, "confirm_email_change"),
+    ).rejects.toThrow(/newEmail/);
+  });
 });
