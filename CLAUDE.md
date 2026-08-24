@@ -59,3 +59,6 @@ All four must pass. If any fail → fix → re-run → green → commit. No exce
 ## Ecosystem Seeds
 
 KHAOS ecosystem patterns live in `../khaos-seeds/`. Before reworking the Supabase surface, read `../khaos-seeds/seed-supabase.md` — this repo is Shape A (Next.js SSR Pattern).
+
+## Root identity
+- Root is `kurt@cotoaga.net`, single source: `lib/root.ts` (COT-150, corrected in f5b40dd). Never re-declare ROOT_EMAIL locally, never write `kurt@cotoaga.ai` — that account does not exist. Old ticket text naming .ai is stale.
