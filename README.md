@@ -50,6 +50,14 @@ npm run lint && npm run typecheck && npm test && npm run build
 4. DevTools → Application → Cookies → confirm `sb-*-auth-token` is `HttpOnly`.
 5. Click **Sign out** on `/account` (or POST `/logout`) → cookie clears → `/account` redirects to `/login`. `GET /logout` returns 405.
 
+### Account flows (COT-151)
+
+Guest invite and visitor request both send real mail via Resend — `RESEND_API_KEY` and `KHAOS_ID_MASTER` must be set for the mail step to succeed locally (unset is fine for exercising everything up to the send).
+
+- **Guest invite:** sign in as root → `/account` → **Guest invites** → `/invites` → invite by email → invitee opens the mail link (`/activate?token=...`) → sets name, surname, password → lands on `/account` as a guest.
+- **Visitor request:** anonymous → `/request` → submit email/name/surname → click the confirm-mailbox link in mail (`/request/confirm`) → root gets a notify mail with a `/review?token=...` link → root approves (visitor gets an activation mail, sets password at `/activate`, `tier=visitor`) or declines (the pending account is hard-deleted — no trace left).
+- **Revoke/resend:** `/invites` lists pending (not-yet-accepted) invites with per-row Resend/Revoke actions.
+
 ## How JWT verification works here
 
 - `supabase/config.toml` sets `signing_keys_path = "./signing_keys.json"`, switching the local GoTrue to asymmetric **ES256** signing.
@@ -66,16 +74,25 @@ app/
   (auth)/actions.ts     server actions: login, logout
   account/page.tsx      authenticated; shows JWT claims + verification
   login/page.tsx        sign-in form
-  request/page.tsx      access-request placeholder (public signup is retired)
+  request/page.tsx      public access-request form (COT-151)
+  request/confirm/      double-opt-in mailbox confirm (GET, consumes token)
+  activate/             shared credential-set page: invite accept + visitor activation
+  invites/              root-only: trigger guest invites, resend/revoke pending
+  review/                root-only: approve/decline pending visitor requests
   logout/route.ts       POST → sign out → redirect / (GET is 405)
   page.tsx              landing
 lib/
   jwt.ts                JWKS-based access-token verifier
+  action-token.ts        signed, purpose-scoped tokens for mail-based flows (COT-151)
+  root-guard.ts           requireRootSession() — tier=root gate for root-only pages
+  mail/
+    resend.ts             Resend client wrapper
+    templates.ts           mail bodies (invite, confirm, notify, activate)
   supabase/
     client.ts           browser client
     server.ts           server client (cookies)
     admin.ts            service-role client
-middleware.ts           cookie-session refresh + /account auth gate
+middleware.ts           cookie-session refresh + /account, /invites, /review auth gate
 scripts/
   generate-signing-keys.mjs
 supabase/
@@ -90,4 +107,4 @@ docs/
 
 ## What's deliberately out of scope
 
-Email verification, MFA, passkeys, OAuth, admin views. Each gets its own issue. Public self-signup is retired by design (COT-150) — accounts are born only via invite or an approved request (COT-151).
+Email verification, MFA, passkeys, OAuth, and the full root Users dashboard (user list, role assignment — COT-152) each get their own issue. Public self-signup is retired by design (COT-150) — accounts are born only via invite or an approved request (COT-151).
