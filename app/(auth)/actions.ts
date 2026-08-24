@@ -45,23 +45,6 @@ async function requestOrigin(): Promise<string> {
   return `${proto}://${host}`;
 }
 
-export async function signupAction(formData: FormData): Promise<void> {
-  const creds = readCredentials(formData);
-  if (!creds) bounceWithError("/signup", "Email and password are required.");
-
-  const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({
-    email: creds.email,
-    password: creds.password,
-  });
-
-  if (error) bounceWithError("/signup", error.message);
-  // Email confirmation is out of scope today, so signUp establishes a live
-  // session immediately — but guard on data.session in case that changes.
-  if (data.session) await mintAndSetSessionDeadlineCookie(data.user?.user_metadata);
-  redirect("/account");
-}
-
 export async function loginAction(formData: FormData): Promise<void> {
   const creds = readCredentials(formData);
   if (!creds) bounceWithError("/login", "Email and password are required.");
@@ -79,7 +62,8 @@ export async function loginAction(formData: FormData): Promise<void> {
 
 export async function logoutAction(): Promise<void> {
   const supabase = await createClient();
-  await supabase.auth.signOut();
+  const { error } = await supabase.auth.signOut();
+  if (error) console.error("[logout] signOut failed:", error.message);
   redirect("/");
 }
 

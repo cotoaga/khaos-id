@@ -5,7 +5,7 @@
 ```
    ┌─────────────────────────┐         ┌─────────────────────────┐
    │       Browser           │  cookie │       khaos-id (Next)   │
-   │   (httpOnly JWT)        │ ──────▶ │  signup / login / acct  │
+   │   (httpOnly JWT)        │ ──────▶ │  login / acct / request │
    └─────────────────────────┘         │   verifies JWT via JWKS │
                                        └────────────┬────────────┘
                                                     │
@@ -50,7 +50,7 @@
 | `lib/supabase/admin.ts` | Service-role client; reserved for trusted backend paths only. |
 | `lib/jwt.ts` | JWKS-based access-token verifier. The thing siblings copy. |
 | `middleware.ts` | Refreshes the cookie session on every request; gates `/account`. |
-| `app/(auth)/actions.ts` | `signupAction`, `loginAction`, `logoutAction` — server actions. |
+| `app/(auth)/actions.ts` | `loginAction`, `logoutAction` — server actions. |
 | `app/account/page.tsx` | Authenticated surface; renders verified claims. |
 
 ## Local JWT signing

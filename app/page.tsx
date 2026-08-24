@@ -34,8 +34,8 @@ export default function Home() {
         <Link href="/login" className={`${ctaLink} text-xs sm:text-sm`}>
           Sign in
         </Link>
-        <Link href="/signup" className={`${ctaLink} text-xs sm:text-sm`}>
-          Create account
+        <Link href="/request" className={`${ctaLink} text-xs sm:text-sm`}>
+          Request access
         </Link>
       </section>
     </main>
