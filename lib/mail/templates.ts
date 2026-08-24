@@ -44,3 +44,19 @@ export function activateVisitorMailBody(activateUrl: string): string {
     <p>This link expires in 7 days.</p>
   `);
 }
+
+export function resetTriggeredMailBody(resetUrl: string): string {
+  return layout(`
+    <p>An admin triggered a password reset for your khaos-id account.</p>
+    ${button(resetUrl, "Choose a new password")}
+    <p>If you didn't expect this, contact root.</p>
+  `);
+}
+
+export function confirmEmailChangeMailBody(confirmUrl: string): string {
+  return layout(`
+    <p>Confirm this address to finish changing your khaos-id email.</p>
+    ${button(confirmUrl, "Confirm new email")}
+    <p>Your current email stays active until you confirm. If you didn't request this, you can ignore this email.</p>
+  `);
+}

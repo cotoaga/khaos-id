@@ -39,7 +39,7 @@ export default async function ForgotPasswordPage({
               name="email"
               required
               autoComplete="email"
-              className="bg-bg-card border border-white/10 px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none"
+              className="bg-bg-card border border-border px-3 py-2 text-sm text-text-primary focus:border-accent focus:outline-none"
             />
           </label>
           {error ? (

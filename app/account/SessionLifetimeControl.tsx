@@ -24,7 +24,7 @@ export function SessionLifetimeControl({ current }: { current: SessionLifetimePr
           name="pref"
           defaultValue={current}
           disabled={pending}
-          className="bg-bg-card border border-white/10 px-3 py-2 text-sm text-text-primary font-mono focus:border-accent focus:outline-none disabled:opacity-50"
+          className="bg-bg-card border border-border px-3 py-2 text-sm text-text-primary font-mono focus:border-accent focus:outline-none disabled:opacity-50"
           onChange={(e) => e.currentTarget.form?.requestSubmit()}
         >
           {OPTIONS.map((o) => (
