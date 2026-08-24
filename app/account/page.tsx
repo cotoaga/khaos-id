@@ -1,6 +1,13 @@
 import { redirect } from "next/navigation";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { verifyAccessToken } from "@/lib/jwt";
+import {
+  resolveSessionLifetimePref,
+  safeVerifySessionDeadline,
+  SESSION_DEADLINE_COOKIE,
+} from "@/lib/session-deadline";
+import { SessionLifetimeControl } from "./SessionLifetimeControl";
 
 interface ClaimRow {
   label: string;
@@ -16,6 +23,17 @@ function formatClaim(key: string, value: unknown): string {
   }
   if (typeof value === "object") return JSON.stringify(value);
   return String(value);
+}
+
+function formatRemaining(deadline: number): string {
+  const remainingMs = deadline * 1000 - Date.now();
+  if (remainingMs <= 0) return "expired";
+  const totalMinutes = Math.floor(remainingMs / 60_000);
+  const days = Math.floor(totalMinutes / (60 * 24));
+  const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+  const minutes = totalMinutes % 60;
+  if (days > 0) return `${days}d ${hours}h remaining`;
+  return `${hours}h ${minutes}m remaining`;
 }
 
 export default async function AccountPage() {
@@ -51,6 +69,12 @@ export default async function AccountPage() {
     .filter((k) => !CORE_CLAIMS.includes(k))
     .sort()
     .map((key) => ({ label: key, value: formatClaim(key, claims[key]) }));
+
+  const currentPref = resolveSessionLifetimePref(claims.user_metadata);
+  const cookieStore = await cookies();
+  const deadline = await safeVerifySessionDeadline(
+    cookieStore.get(SESSION_DEADLINE_COOKIE)?.value,
+  );
 
   return (
     <main className="mx-auto flex min-h-screen max-w-2xl flex-col gap-6 px-6 py-12">
@@ -131,6 +155,20 @@ export default async function AccountPage() {
           </dl>
         </section>
       ) : null}
+
+      <section className="bg-bg-card border border-white/10 p-4">
+        <h2 className="text-xs font-semibold uppercase tracking-wide text-text-secondary">
+          Session lifetime
+        </h2>
+        <p className="mt-2 text-sm text-text-primary">
+          {deadline
+            ? formatRemaining(deadline.deadline)
+            : "No enforced deadline on this session — sign in again to establish one."}
+        </p>
+        <div className="mt-3">
+          <SessionLifetimeControl current={currentPref} />
+        </div>
+      </section>
 
       <div className="flex items-center justify-between pt-2">
         <form action="/logout" method="post">
