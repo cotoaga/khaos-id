@@ -168,6 +168,15 @@ describe("logoutAction", () => {
     expect(target).toBe("/");
     expect(signOut).toHaveBeenCalled();
   });
+
+  it("logs and still redirects when signOut errors", async () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => {});
+    signOut.mockResolvedValue({ error: { message: "boom" } });
+    const target = await captureRedirect(logoutAction());
+    expect(target).toBe("/");
+    expect(consoleError).toHaveBeenCalledWith("[logout] signOut failed:", "boom");
+    consoleError.mockRestore();
+  });
 });
 
 describe("requestPasswordResetAction", () => {
