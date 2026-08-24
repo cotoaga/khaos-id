@@ -5,7 +5,7 @@ import { sendMail } from "@/lib/mail/resend";
 import { notifyRootMailBody } from "@/lib/mail/templates";
 
 const REVIEW_TOKEN_TTL_SECONDS = 60 * 60 * 24 * 7;
-const ROOT_EMAIL = "kurt@cotoaga.net"; // matches the account-model root hardwire (COT-150)
+import { ROOT_EMAIL } from "@/lib/root";
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const token = request.nextUrl.searchParams.get("token");

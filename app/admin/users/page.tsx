@@ -12,7 +12,7 @@ import {
   revokeInviteFromDashboardAction,
 } from "./actions";
 
-const ROOT_EMAIL = "kurt@cotoaga.ai";
+import { ROOT_EMAIL } from "@/lib/root";
 
 interface UserRow {
   id: string;

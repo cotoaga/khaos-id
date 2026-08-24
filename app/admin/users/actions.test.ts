@@ -66,7 +66,7 @@ async function captureRedirect(promise: Promise<unknown>): Promise<string> {
 }
 
 beforeEach(() => {
-  requireRootOr404.mockReset().mockResolvedValue({ userId: "root-1", email: "kurt@cotoaga.ai" });
+  requireRootOr404.mockReset().mockResolvedValue({ userId: "root-1", email: "kurt@cotoaga.net" });
   getUserById.mockReset();
   updateUserById.mockReset();
   generateLink.mockReset();
@@ -92,7 +92,7 @@ describe("upgradeToGuestAction", () => {
 
   it("refuses to touch root", async () => {
     getUserById.mockResolvedValue({
-      data: { user: { id: "root-1", email: "kurt@cotoaga.ai", app_metadata: { tier: "root" } } },
+      data: { user: { id: "root-1", email: "kurt@cotoaga.net", app_metadata: { tier: "root" } } },
       error: null,
     });
     const target = await captureRedirect(upgradeToGuestAction(fd({ userId: "root-1" })));
@@ -170,7 +170,7 @@ describe("disableUserAction", () => {
 
   it("refuses to disable root", async () => {
     getUserById.mockResolvedValue({
-      data: { user: { id: "root-1", email: "kurt@cotoaga.ai" } },
+      data: { user: { id: "root-1", email: "kurt@cotoaga.net" } },
       error: null,
     });
     const target = await captureRedirect(disableUserAction(fd({ userId: "root-1" })));

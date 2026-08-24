@@ -11,7 +11,7 @@ import { resendGuestInvite, revokeGuestInvite } from "@/lib/guest-invite";
 
 // Hardwired root identity (COT-150) — mirrors the custom_access_token_hook
 // migration. Root's tier and login are never touched from this dashboard.
-const ROOT_EMAIL = "kurt@cotoaga.ai";
+import { ROOT_EMAIL } from "@/lib/root";
 
 async function requestOrigin(): Promise<string> {
   const h = await headers();
