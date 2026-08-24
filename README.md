@@ -44,10 +44,11 @@ npm run lint && npm run typecheck && npm test && npm run build
 
 ### Manual smoke test
 
-1. Visit `http://localhost:3000` → click **Create an account** → submit `you@example.com` / `secret-123`.
-2. You land on `/account`, which shows your JWT claims (`sub`, `email`, `aud`, `iss`, `exp`, `iat`, `role`) and a green "Signature verified" line proving the access token validates against the local JWKS endpoint.
-3. DevTools → Application → Cookies → confirm `sb-*-auth-token` is `HttpOnly`.
-4. Click **Sign out** on `/account` (or POST `/logout`) → cookie clears → `/account` redirects to `/login`.
+1. Public self-signup is retired — create a test account via Supabase Studio (`http://127.0.0.1:54323` → Authentication → Users → Add user) or the admin API.
+2. Visit `http://localhost:3000` → click **Sign in** → log in with that account.
+3. You land on `/account`, which shows your JWT claims (`sub`, `email`, `aud`, `iss`, `exp`, `iat`, `role`, `tier`) and a green "Signature verified" line proving the access token validates against the local JWKS endpoint.
+4. DevTools → Application → Cookies → confirm `sb-*-auth-token` is `HttpOnly`.
+5. Click **Sign out** on `/account` (or POST `/logout`) → cookie clears → `/account` redirects to `/login`. `GET /logout` returns 405.
 
 ## How JWT verification works here
 
@@ -62,11 +63,11 @@ For sibling apps that want to do the same: see `docs/sibling-integration.md` —
 
 ```
 app/
-  (auth)/actions.ts     server actions: signup, login, logout
+  (auth)/actions.ts     server actions: login, logout
   account/page.tsx      authenticated; shows JWT claims + verification
   login/page.tsx        sign-in form
-  signup/page.tsx       sign-up form
-  logout/route.ts       POST → sign out → redirect /
+  request/page.tsx      access-request placeholder (public signup is retired)
+  logout/route.ts       POST → sign out → redirect / (GET is 405)
   page.tsx              landing
 lib/
   jwt.ts                JWKS-based access-token verifier
@@ -89,4 +90,4 @@ docs/
 
 ## What's deliberately out of scope
 
-Password reset, email verification, MFA, passkeys, OAuth, admin views, custom-domain cookie scope. Each gets its own issue.
+Email verification, MFA, passkeys, OAuth, admin views. Each gets its own issue. Public self-signup is retired by design (COT-150) — accounts are born only via invite or an approved request (COT-151).
