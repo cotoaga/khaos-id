@@ -11,6 +11,7 @@ import {
   declinePendingAction,
   resendInviteFromDashboardAction,
   revokeInviteFromDashboardAction,
+  purgeUserAction,
 } from "./actions";
 
 import { ROOT_EMAIL } from "@/lib/root";
@@ -56,7 +57,10 @@ async function listUserRows(): Promise<UserRow[]> {
         surname: u.user_metadata?.surname ?? "",
         tier: isRoot ? "root" : (u.app_metadata?.tier ?? "guest"),
         source: u.app_metadata?.source ?? (isRoot ? "root" : "—"),
-        status: u.app_metadata?.status ?? null,
+        // A signed-in user has credentials: only /activate clears status
+        // markers, so recovery-path logins would otherwise wear a stale
+        // pending badge forever.
+        status: u.last_sign_in_at ? null : (u.app_metadata?.status ?? null),
         createdAt: u.created_at,
         lastSignInAt: u.last_sign_in_at ?? null,
         disabled,
@@ -80,6 +84,7 @@ const DONE_MESSAGES: Record<string, string> = {
   declined: "Request declined and deleted.",
   resent: "Invite resent.",
   revoked: "Invite revoked.",
+  purged: "Account purged.",
 };
 
 export default async function AdminUsersPage({
@@ -177,7 +182,7 @@ export default async function AdminUsersPage({
                 <td className="px-3 py-2 text-text-secondary">{formatDate(row.createdAt)}</td>
                 <td className="px-3 py-2 text-text-secondary">{formatDate(row.lastSignInAt)}</td>
                 <td className="px-3 py-2">
-                  <RowActions row={row} />
+                  <RowActions row={row} confirmPurge={params.confirmPurge} />
                 </td>
               </tr>
             ))}
@@ -192,7 +197,35 @@ export default async function AdminUsersPage({
   );
 }
 
-function RowActions({ row }: { row: UserRow }) {
+function PurgeControl({ row, confirmPurge }: { row: UserRow; confirmPurge?: string }) {
+  if (confirmPurge === row.id) {
+    return (
+      <form action={purgeUserAction} className="flex items-center gap-2">
+        <input type="hidden" name="userId" value={row.id} />
+        <input type="hidden" name="confirm" value={row.id} />
+        <button
+          type="submit"
+          className="bg-danger px-2 py-1 text-xs font-medium text-white transition-opacity hover:opacity-80"
+        >
+          Confirm purge
+        </button>
+        <Link href="/admin/users" className="text-xs text-text-secondary underline">
+          Cancel
+        </Link>
+      </form>
+    );
+  }
+  return (
+    <Link
+      href={`/admin/users?confirmPurge=${row.id}`}
+      className="border border-danger px-2 py-1 text-xs text-danger transition-colors hover:bg-danger/10"
+    >
+      Purge
+    </Link>
+  );
+}
+
+function RowActions({ row, confirmPurge }: { row: UserRow; confirmPurge?: string }) {
   if (row.tier === "root") {
     return <span className="text-xs text-text-secondary">—</span>;
   }
@@ -228,6 +261,7 @@ function RowActions({ row }: { row: UserRow }) {
 
   if (row.disabled) {
     return (
+      <div className="flex items-center gap-2">
       <form action={enableUserAction} className="flex items-center gap-2">
         <span className="text-xs text-danger">Disabled</span>
         <input type="hidden" name="userId" value={row.id} />
@@ -238,6 +272,8 @@ function RowActions({ row }: { row: UserRow }) {
           Re-enable
         </button>
       </form>
+      <PurgeControl row={row} confirmPurge={confirmPurge} />
+      </div>
     );
   }
 
@@ -283,6 +319,7 @@ function RowActions({ row }: { row: UserRow }) {
           Disable
         </button>
       </form>
+      <PurgeControl row={row} confirmPurge={confirmPurge} />
     </div>
   );
 }

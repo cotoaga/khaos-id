@@ -128,6 +128,21 @@ export async function enableUserAction(formData: FormData): Promise<void> {
   redirect("/admin/users?enabled=1");
 }
 
+export async function purgeUserAction(formData: FormData): Promise<void> {
+  await requireRootOr404();
+  const userId = readUserId(formData);
+  // Irreversible: the form must echo the userId back as explicit confirmation
+  // (the dashboard renders the confirm step as a deliberate second click).
+  if (formData.get("confirm") !== userId) bounce("Purge requires confirmation.");
+  const admin = createAdminClient();
+  const { data, error } = await admin.auth.admin.getUserById(userId);
+  if (error || !data.user) bounce("User not found.");
+  if (data.user.email === ROOT_EMAIL) bounce("Cannot purge root.");
+  const { error: deleteError } = await admin.auth.admin.deleteUser(userId);
+  if (deleteError) bounce("Could not purge this account.");
+  redirect("/admin/users?purged=1");
+}
+
 export async function approvePendingAction(formData: FormData): Promise<void> {
   await requireRootOr404();
   const userId = readUserId(formData);

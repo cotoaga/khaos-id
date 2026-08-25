@@ -9,6 +9,7 @@ const approveVisitorRequest = vi.fn();
 const declineVisitorRequest = vi.fn();
 const resendGuestInvite = vi.fn();
 const revokeGuestInvite = vi.fn();
+const deleteUser = vi.fn();
 
 vi.mock("next/navigation", () => ({
   redirect: (target: string) => {
@@ -28,7 +29,7 @@ vi.mock("@/lib/root-guard", () => ({ requireRootOr404 }));
 
 vi.mock("@/lib/supabase/admin", () => ({
   createAdminClient: () => ({
-    auth: { admin: { getUserById, updateUserById, generateLink } },
+    auth: { admin: { getUserById, updateUserById, generateLink, deleteUser } },
   }),
 }));
 
@@ -46,6 +47,7 @@ const {
   declinePendingAction,
   resendInviteFromDashboardAction,
   revokeInviteFromDashboardAction,
+  purgeUserAction,
 } = await import("@/app/admin/users/actions");
 
 function fd(values: Record<string, string>): FormData {
@@ -250,5 +252,40 @@ describe("resendInviteFromDashboardAction / revokeInviteFromDashboardAction", ()
     resendGuestInvite.mockResolvedValue({ outcome: "not_pending" });
     const target = await captureRedirect(resendInviteFromDashboardAction(fd({ userId: "u1" })));
     expect(target).toMatch(/^\/admin\/users\?error=/);
+  });
+});
+
+describe("purgeUserAction", () => {
+  it("bounces when the confirm field does not echo the userId", async () => {
+    const target = await captureRedirect(
+      purgeUserAction(fd({ userId: "user-1", confirm: "someone-else" })),
+    );
+    expect(target).toContain("error=");
+    expect(deleteUser).not.toHaveBeenCalled();
+  });
+
+  it("refuses to purge root", async () => {
+    getUserById.mockResolvedValue({
+      data: { user: { id: "root-1", email: "kurt@cotoaga.net", app_metadata: { tier: "root" } } },
+      error: null,
+    });
+    const target = await captureRedirect(
+      purgeUserAction(fd({ userId: "root-1", confirm: "root-1" })),
+    );
+    expect(target).toContain("error=");
+    expect(deleteUser).not.toHaveBeenCalled();
+  });
+
+  it("deletes a confirmed non-root account and redirects with purged=1", async () => {
+    getUserById.mockResolvedValue({
+      data: { user: { id: "user-2", email: "guest@example.com", app_metadata: { tier: "guest" } } },
+      error: null,
+    });
+    deleteUser.mockResolvedValue({ error: null });
+    const target = await captureRedirect(
+      purgeUserAction(fd({ userId: "user-2", confirm: "user-2" })),
+    );
+    expect(target).toBe("/admin/users?purged=1");
+    expect(deleteUser).toHaveBeenCalledWith("user-2");
   });
 });
