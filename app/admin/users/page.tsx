@@ -6,6 +6,7 @@ import {
   downgradeToVisitorAction,
   triggerPasswordResetAction,
   disableUserAction,
+  enableUserAction,
   approvePendingAction,
   declinePendingAction,
   resendInviteFromDashboardAction,
@@ -74,6 +75,7 @@ const DONE_MESSAGES: Record<string, string> = {
   downgraded: "Account downgraded to visitor.",
   resetsent: "Password reset mail sent.",
   disabled: "Account disabled.",
+  enabled: "Account re-enabled.",
   approved: "Request approved. An activation email is on its way.",
   declined: "Request declined and deleted.",
   resent: "Invite resent.",
@@ -225,7 +227,18 @@ function RowActions({ row }: { row: UserRow }) {
   }
 
   if (row.disabled) {
-    return <span className="text-xs text-danger">Disabled</span>;
+    return (
+      <form action={enableUserAction} className="flex items-center gap-2">
+        <span className="text-xs text-danger">Disabled</span>
+        <input type="hidden" name="userId" value={row.id} />
+        <button
+          type="submit"
+          className="border border-success px-2 py-1 text-xs text-success transition-colors hover:bg-success/10"
+        >
+          Re-enable
+        </button>
+      </form>
+    );
   }
 
   return (

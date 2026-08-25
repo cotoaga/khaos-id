@@ -41,6 +41,7 @@ const {
   downgradeToVisitorAction,
   triggerPasswordResetAction,
   disableUserAction,
+  enableUserAction,
   approvePendingAction,
   declinePendingAction,
   resendInviteFromDashboardAction,
@@ -175,6 +176,36 @@ describe("disableUserAction", () => {
     });
     const target = await captureRedirect(disableUserAction(fd({ userId: "root-1" })));
     expect(target).toMatch(/^\/admin\/users\?error=/);
+    expect(updateUserById).not.toHaveBeenCalled();
+  });
+});
+
+describe("enableUserAction", () => {
+  it("lifts the ban", async () => {
+    getUserById.mockResolvedValue({
+      data: { user: { id: "u1", email: "g@example.com" } },
+      error: null,
+    });
+    updateUserById.mockResolvedValue({ error: null });
+    const target = await captureRedirect(enableUserAction(fd({ userId: "u1" })));
+    expect(updateUserById).toHaveBeenCalledWith("u1", { ban_duration: "none" });
+    expect(target).toBe("/admin/users?enabled=1");
+  });
+
+  it("is idempotent on an already-active account", async () => {
+    getUserById.mockResolvedValue({
+      data: { user: { id: "u1", email: "g@example.com", banned_until: null } },
+      error: null,
+    });
+    updateUserById.mockResolvedValue({ error: null });
+    const target = await captureRedirect(enableUserAction(fd({ userId: "u1" })));
+    expect(updateUserById).toHaveBeenCalledWith("u1", { ban_duration: "none" });
+    expect(target).toBe("/admin/users?enabled=1");
+  });
+
+  it("blocks non-root callers", async () => {
+    requireRootOr404.mockRejectedValueOnce(new Error("NEXT_NOT_FOUND"));
+    await expect(enableUserAction(fd({ userId: "u1" }))).rejects.toThrow("NEXT_NOT_FOUND");
     expect(updateUserById).not.toHaveBeenCalled();
   });
 });
