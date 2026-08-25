@@ -112,6 +112,22 @@ export async function disableUserAction(formData: FormData): Promise<void> {
   redirect("/admin/users?disabled=1");
 }
 
+export async function enableUserAction(formData: FormData): Promise<void> {
+  await requireRootOr404();
+  const userId = readUserId(formData);
+
+  const admin = createAdminClient();
+  const { data, error } = await admin.auth.admin.getUserById(userId);
+  if (error || !data.user) bounce("User not found.");
+
+  const { error: updateError } = await admin.auth.admin.updateUserById(userId, {
+    ban_duration: "none",
+  });
+  if (updateError) bounce("Could not re-enable this account.");
+
+  redirect("/admin/users?enabled=1");
+}
+
 export async function approvePendingAction(formData: FormData): Promise<void> {
   await requireRootOr404();
   const userId = readUserId(formData);
